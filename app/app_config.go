@@ -70,8 +70,6 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
 	ibcexported "github.com/cosmos/ibc-go/v10/modules/core/exported"
-	_ "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/module"
-	blocrestakemoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
 	_ "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/module"
 	lyfeblocnetworkmoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/types"
 	_ "github.com/lyfeloopinc/lyfebloc-network/x/restake/module"
@@ -93,7 +91,7 @@ var (
 		{Account: evmtypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}, {Account: erc20types.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: feemarkettypes.ModuleName},
 		// blocked account addresses
-		{Account: restakemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}}, {Account: blocrestakemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}}}
+		{Account: restakemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}}}
 	blockAccAddrs = []string{
 		authtypes.FeeCollectorName,
 		distrtypes.ModuleName,
@@ -139,7 +137,6 @@ var (
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
 						restakemoduletypes.ModuleName,
-						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -154,7 +151,6 @@ var (
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
 						restakemoduletypes.ModuleName,
-						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -199,7 +195,6 @@ var (
 						// moved down because of evm modules
 						genutiltypes.ModuleName,
 						restakemoduletypes.ModuleName,
-						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -303,10 +298,6 @@ var (
 			{
 				Name:   restakemoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&restakemoduletypes.Module{}),
-			},
-			{
-				Name:   blocrestakemoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&blocrestakemoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

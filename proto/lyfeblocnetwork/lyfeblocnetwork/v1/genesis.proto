@@ -1,0 +1,17 @@
+syntax = "proto3";
+package lyfeblocnetwork.lyfeblocnetwork.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "lyfeblocnetwork/lyfeblocnetwork/v1/params.proto";
+
+option go_package = "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/types";
+
+// GenesisState defines the lyfeblocnetwork module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

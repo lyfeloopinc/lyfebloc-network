@@ -1,75 +1,62 @@
 package keeper
 
 import (
-	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 
-	"cosmossdk.io/collections"
-	"cosmossdk.io/core/address"
-	corestore "cosmossdk.io/core/store"
-	"github.com/cosmos/cosmos-sdk/codec"
-	  ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper" 
-
-	"github.com/lyfeloopinc/lyfebloc-network/x/restake/types"
+	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
 )
 
-type Keeper struct {
-	storeService corestore.KVStoreService
-	cdc          codec.Codec
-	addressCodec address.Codec
-	// Address capable of executing a MsgUpdateParams message.
-	// Typically, this should be the x/gov module account.
-	authority []byte
+type (
+	Keeper struct {
+		storeKey   sdk.StoreKey
+		cdc        codec.BinaryCodec
+		bankKeeper keeper.Keeper
+		stkKeeper  *stakingkeeper.Keeper
+		ibcKeeper  ibcexported.ChannelKeeper
+	}
+)
 
-	Schema collections.Schema
-	Params collections.Item[types.Params]
-    
-	Port   collections.Item[string]
-
-	ibcKeeperFn func() *ibckeeper.Keeper 
-	
-    bankKeeper types.BankKeeper
-    stakingKeeper types.StakingKeeper
-}
-
+// NewKeeper creates a new blocrestake Keeper instance
 func NewKeeper(
-	storeService corestore.KVStoreService,
-	cdc codec.Codec,
-	addressCodec address.Codec,
-	authority []byte,
-	ibcKeeperFn func() *ibckeeper.Keeper,
-    
-    bankKeeper types.BankKeeper,
-    stakingKeeper types.StakingKeeper,
+	cdc codec.BinaryCodec,
+	key sdk.StoreKey,
+	bk keeper.Keeper,
+	sk *stakingkeeper.Keeper,
+	ibc ibcexported.ChannelKeeper,
 ) Keeper {
-	if _, err := addressCodec.BytesToString(authority); err != nil {
-		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
+	return Keeper{
+		storeKey:   key,
+		cdc:        cdc,
+		bankKeeper: bk,
+		stkKeeper:  sk,
+		ibcKeeper:  ibc,
 	}
-
-	sb := collections.NewSchemaBuilder(storeService)
-
-	k := Keeper{
-		storeService: storeService,
-		cdc:          cdc,
-		addressCodec: addressCodec,
-		authority:    authority,
-		
-		bankKeeper: bankKeeper,
-		stakingKeeper: stakingKeeper,
-		ibcKeeperFn:  ibcKeeperFn,
-		Port:         collections.NewItem(sb, types.PortKey, "port", collections.StringValue),
-		Params:       collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
-	}
-
-	schema, err := sb.Build()
-	if err != nil {
-		panic(err)
-	}
-	k.Schema = schema
-
-	return k
 }
 
-// GetAuthority returns the module's authority.
-func (k Keeper) GetAuthority() []byte {
-	return k.authority
+// DelegateTokens lets a user delegate tokens to a validator
+func (k Keeper) DelegateTokens(ctx sdk.Context, delegator sdk.AccAddress, validator sdk.ValAddress, amount sdk.Coin) error {
+	val, found := k.stkKeeper.GetValidator(ctx, validator)
+	if !found {
+		return types.ErrValidatorNotFound
+	}
+
+	_, err := k.stkKeeper.Delegate(ctx, delegator, amount.Amount, stakingtypes.Unbonded, val, true)
+	return err
+}
+
+// UndelegateTokens undelegates tokens from a validator
+func (k Keeper) UndelegateTokens(ctx sdk.Context, delegator sdk.AccAddress, validator sdk.ValAddress, amount sdk.Coin) error {
+	_, err := k.stkKeeper.Undelegate(ctx, delegator, validator, amount.Amount)
+	return err
+}
+
+// ClaimAndRestake claims rewards and re-delegates them automatically
+func (k Keeper) ClaimAndRestake(ctx sdk.Context, delegator sdk.AccAddress, validator sdk.ValAddress) error {
+	rewards := sdk.NewCoin("ulbt", sdk.NewInt(1000)) // Placeholder — hook this to distribution module later
+	err := k.DelegateTokens(ctx, delegator, validator, rewards)
+	return err
 }

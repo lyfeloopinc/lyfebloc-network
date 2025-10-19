@@ -28,7 +28,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "UpdateParams",
 					Skip:       true, // skipped because authority gated
 				},
-				// this line is used by ignite scaffolding # autocli/tx
+				{
+			RpcMethod: "Delegate",
+			Use: "delegate [delegator] [validator] [amount]",
+			Short: "Send a Delegate tx",
+			PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "delegator"}, {ProtoField: "validator"}, {ProtoField: "amount"}},
+		},
+		// this line is used by ignite scaffolding # autocli/tx
 			},
 		},
 	}

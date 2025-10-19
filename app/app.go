@@ -57,6 +57,7 @@ import (
 
 	"github.com/lyfeloopinc/lyfebloc-network/docs"
 	lyfeblocnetworkmodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/keeper"
+	restakemodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/restake/keeper"
 )
 
 const (
@@ -119,7 +120,8 @@ type App struct {
 	Erc20Keeper           erc20keeper.Keeper
 
 	// AppConfig returns the default app config.
-	EVMMempool *evmmempool.ExperimentalEVMMempool
+	EVMMempool    *evmmempool.ExperimentalEVMMempool
+	RestakeKeeper restakemodulekeeper.Keeper
 }
 
 func init() {
@@ -192,6 +194,7 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
 		&app.LyfeblocnetworkKeeper, &app.FeeGrantKeeper,
+		&app.RestakeKeeper,
 	); err != nil {
 		panic(err)
 	}

@@ -1,0 +1,15 @@
+syntax = "proto3";
+package lyfeblocnetwork.restake.v1;
+
+option go_package = "github.com/lyfeloopinc/lyfebloc-network/x/restake/types";
+
+// RestakePacketData defines the Restake data packet.
+message RestakePacketData {
+    oneof packet {
+        NoData noData = 1;
+    }
+}
+
+// NoData defines an empty data packet.
+message NoData {
+}

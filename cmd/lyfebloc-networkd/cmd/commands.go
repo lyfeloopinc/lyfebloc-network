@@ -13,7 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/pruning"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
@@ -23,6 +22,8 @@ import (
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	cosmosevmcmd "github.com/cosmos/evm/client"
+	cosmosevmserver "github.com/cosmos/evm/server"
 
 	"github.com/lyfeloopinc/lyfebloc-network/app"
 )
@@ -41,10 +42,14 @@ func initRootCmd(
 		pruning.Cmd(newApp, app.DefaultNodeHome),
 		snapshot.Cmd(newApp),
 	)
-
-	server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{
-		AddFlags: addModuleInitFlags,
-	})
+	cosmosevmserver.AddCommands(
+		rootCmd,
+		cosmosevmserver.NewDefaultStartOptions(func(l log.Logger, d dbm.DB, w io.Writer, ao servertypes.AppOptions) cosmosevmserver.Application {
+			return newApp(l, d, w, ao).(cosmosevmserver.Application)
+		}, app.DefaultNodeHome),
+		appExport,
+		addModuleInitFlags,
+	)
 
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
@@ -52,7 +57,7 @@ func initRootCmd(
 		genutilcli.Commands(txConfig, basicManager, app.DefaultNodeHome),
 		queryCommand(),
 		txCommand(),
-		keys.Commands(),
+		cosmosevmcmd.KeyCommands(app.DefaultNodeHome, false),
 	)
 }
 

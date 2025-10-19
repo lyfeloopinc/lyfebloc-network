@@ -56,6 +56,7 @@ import (
 	"github.com/spf13/cast"
 
 	"github.com/lyfeloopinc/lyfebloc-network/docs"
+	blocrestakemodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/keeper"
 	lyfeblocnetworkmodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/keeper"
 	restakemodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/restake/keeper"
 )
@@ -120,8 +121,9 @@ type App struct {
 	Erc20Keeper           erc20keeper.Keeper
 
 	// AppConfig returns the default app config.
-	EVMMempool    *evmmempool.ExperimentalEVMMempool
-	RestakeKeeper restakemodulekeeper.Keeper
+	EVMMempool        *evmmempool.ExperimentalEVMMempool
+	RestakeKeeper     restakemodulekeeper.Keeper
+	BlocrestakeKeeper blocrestakemodulekeeper.Keeper
 }
 
 func init() {
@@ -195,6 +197,7 @@ func New(
 		&app.ParamsKeeper,
 		&app.LyfeblocnetworkKeeper, &app.FeeGrantKeeper,
 		&app.RestakeKeeper,
+		&app.BlocrestakeKeeper,
 	); err != nil {
 		panic(err)
 	}

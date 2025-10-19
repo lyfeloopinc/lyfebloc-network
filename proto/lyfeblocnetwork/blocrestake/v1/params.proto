@@ -1,0 +1,14 @@
+syntax = "proto3";
+package lyfeblocnetwork.blocrestake.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "lyfeblocnetwork/x/blocrestake/Params";
+  option (gogoproto.equal) = true;
+  
+}

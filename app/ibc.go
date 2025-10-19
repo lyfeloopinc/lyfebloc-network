@@ -33,6 +33,8 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 	solomachine "github.com/cosmos/ibc-go/v10/modules/light-clients/06-solomachine"
 	ibctm "github.com/cosmos/ibc-go/v10/modules/light-clients/07-tendermint"
+	blocrestakemodule "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/module"
+	blocrestakemoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
 	restakemodule "github.com/lyfeloopinc/lyfebloc-network/x/restake/module"
 	restakemoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/restake/types"
 )
@@ -128,7 +130,9 @@ func (app *App) registerIBCModules(appOpts servertypes.AppOptions) error {
 		AddRoute(ibctransfertypes.PortID, transferStackV2)
 
 	restakeIBCModule := restakemodule.NewIBCModule(app.appCodec, app.RestakeKeeper)
-		ibcRouter.AddRoute(restakemoduletypes.ModuleName, restakeIBCModule)
+	ibcRouter.AddRoute(restakemoduletypes.ModuleName, restakeIBCModule)
+	blocrestakeIBCModule := blocrestakemodule.NewIBCModule(app.appCodec, app.BlocrestakeKeeper)
+		ibcRouter.AddRoute(blocrestakemoduletypes.ModuleName, blocrestakeIBCModule)
 // this line is used by starport scaffolding # ibc/app/module
 
 	app.IBCKeeper.SetRouter(ibcRouter)

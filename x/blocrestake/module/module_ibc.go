@@ -3,14 +3,12 @@ package blocrestake
 import (
 	"fmt"
 
-	"cosmossdk.io/core/event"
 	errorsmod "cosmossdk.io/errors"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	channeltypes "github.com/cosmos/ibc-go/v10/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v10/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v10/modules/core/exported"
 	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/keeper"
 	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
@@ -25,7 +23,7 @@ type IBCModule struct {
 // NewIBCModule creates a new IBCModule given the associated keeper
 func NewIBCModule(cdc codec.Codec, k keeper.Keeper) IBCModule {
 	return IBCModule{
-		cdc: cdc,
+		cdc:    cdc,
 		keeper: k,
 	}
 }
@@ -158,29 +156,28 @@ func (im IBCModule) OnAcknowledgementPacket(
 		return errorsmod.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
 	}
 
-
-    ctx.EventManager().EmitEvent(
-        sdk.NewEvent(
-            eventType,
-            sdk.NewAttribute(types.AttributeKeyAck, fmt.Sprintf("%v", ack)),
-        ),
-    )
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			eventType,
+			sdk.NewAttribute(types.AttributeKeyAck, fmt.Sprintf("%v", ack)),
+		),
+	)
 
 	switch resp := ack.Response.(type) {
 	case *channeltypes.Acknowledgement_Result:
-    	ctx.EventManager().EmitEvent(
-    	    sdk.NewEvent(
-    	        eventType,
-    	        sdk.NewAttribute(types.AttributeKeyAckSuccess, string(resp.Result)),
-    	    ),
-    	)
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				eventType,
+				sdk.NewAttribute(types.AttributeKeyAckSuccess, string(resp.Result)),
+			),
+		)
 	case *channeltypes.Acknowledgement_Error:
-    	ctx.EventManager().EmitEvent(
-    	    sdk.NewEvent(
-    	        eventType,
-    	        sdk.NewAttribute(types.AttributeKeyAckError, resp.Error),
-    	    ),
-    	)
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				eventType,
+				sdk.NewAttribute(types.AttributeKeyAckError, resp.Error),
+			),
+		)
 	}
 
 	return nil

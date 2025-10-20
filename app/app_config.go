@@ -74,8 +74,6 @@ import (
 	blocrestakemoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
 	_ "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/module"
 	lyfeblocnetworkmoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/types"
-	_ "github.com/lyfeloopinc/lyfebloc-network/x/restake/module"
-	restakemoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/restake/types"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -90,10 +88,11 @@ var (
 		{Account: nft.ModuleName},
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: icatypes.ModuleName},
-		{Account: evmtypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}, {Account: erc20types.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+		{Account: evmtypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+		{Account: erc20types.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: feemarkettypes.ModuleName},
-		// blocked account addresses
-		{Account: restakemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}}, {Account: blocrestakemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}}}
+		{Account: blocrestakemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
+	}
 	blockAccAddrs = []string{
 		authtypes.FeeCollectorName,
 		distrtypes.ModuleName,
@@ -138,7 +137,6 @@ var (
 						erc20types.ModuleName,
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
-						restakemoduletypes.ModuleName,
 						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
@@ -153,7 +151,6 @@ var (
 						erc20types.ModuleName,
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
-						restakemoduletypes.ModuleName,
 						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
@@ -198,7 +195,6 @@ var (
 						evmtypes.ModuleName,
 						// moved down because of evm modules
 						genutiltypes.ModuleName,
-						restakemoduletypes.ModuleName,
 						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
@@ -299,10 +295,6 @@ var (
 			{
 				Name:   lyfeblocnetworkmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&lyfeblocnetworkmoduletypes.Module{}),
-			},
-			{
-				Name:   restakemoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&restakemoduletypes.Module{}),
 			},
 			{
 				Name:   blocrestakemoduletypes.ModuleName,

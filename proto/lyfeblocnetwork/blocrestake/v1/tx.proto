@@ -20,6 +20,12 @@ service Msg {
   
   // Delegate defines the Delegate RPC.
   rpc Delegate (MsgDelegate) returns (MsgDelegateResponse);
+
+  // Undelegate defines the Undelegate RPC.
+  rpc Undelegate (MsgUndelegate) returns (MsgUndelegateResponse);
+
+  // ClaimAndRestake defines the ClaimAndRestake RPC.
+  rpc ClaimAndRestake (MsgClaimAndRestake) returns (MsgClaimAndRestakeResponse);
 }
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
@@ -51,3 +57,25 @@ message MsgDelegate {
 // MsgDelegateResponse defines the MsgDelegateResponse message.
 message MsgDelegateResponse {}
 
+// MsgUndelegate defines the MsgUndelegate message.
+message MsgUndelegate {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string delegator = 2;
+  string validator = 3;
+  uint64 amount    = 4;
+}
+
+// MsgUndelegateResponse defines the MsgUndelegateResponse message.
+message MsgUndelegateResponse {}
+
+// MsgClaimAndRestake defines the MsgClaimAndRestake message.
+message MsgClaimAndRestake {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string delegator = 2;
+  string validator = 3;
+}
+
+// MsgClaimAndRestakeResponse defines the MsgClaimAndRestakeResponse message.
+message MsgClaimAndRestakeResponse {}

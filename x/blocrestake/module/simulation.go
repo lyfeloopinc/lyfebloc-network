@@ -1,11 +1,11 @@
 package blocrestake
 
 import (
-	"cosmossdk.io/core/address"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"math/rand"
+
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"math/rand"
+	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	blocrestakesimulation "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/simulation"
 	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
@@ -31,7 +31,7 @@ func (am AppModule) RegisterStoreDecoder(_ simtypes.StoreDecoderRegistry) {}
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	operations := make([]simtypes.WeightedOperation, 0)
 	const (
-		opWeightMsgDelegate          = "op_weight_msg_blocrestake"
+		opWeightMsgDelegate          = "op_weight_msg_blocrestake_delegate"
 		defaultWeightMsgDelegate int = 100
 	)
 
@@ -43,7 +43,39 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	)
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgDelegate,
-		blocrestakesimulation.SimulateMsgDelegate(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+		blocrestakesimulation.SimulateMsgDelegate(am.keeper, simState.TxConfig),
+	))
+
+	const (
+		opWeightMsgUndelegate          = "op_weight_msg_blocrestake_undelegate"
+		defaultWeightMsgUndelegate int = 100
+	)
+
+	var weightMsgUndelegate int
+	simState.AppParams.GetOrGenerate(opWeightMsgUndelegate, &weightMsgUndelegate, nil,
+		func(_ *rand.Rand) {
+			weightMsgUndelegate = defaultWeightMsgUndelegate
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgUndelegate,
+		blocrestakesimulation.SimulateMsgUndelegate(am.keeper, simState.TxConfig),
+	))
+
+	const (
+		opWeightMsgClaimAndRestake          = "op_weight_msg_blocrestake_claim_and_restake"
+		defaultWeightMsgClaimAndRestake int = 100
+	)
+
+	var weightMsgClaimAndRestake int
+	simState.AppParams.GetOrGenerate(opWeightMsgClaimAndRestake, &weightMsgClaimAndRestake, nil,
+		func(_ *rand.Rand) {
+			weightMsgClaimAndRestake = defaultWeightMsgClaimAndRestake
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgClaimAndRestake,
+		blocrestakesimulation.SimulateMsgClaimAndRestake(am.keeper, simState.TxConfig),
 	))
 
 	return operations

@@ -7,7 +7,7 @@ import (
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
-	  ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper" 
+	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
 )
@@ -22,13 +22,14 @@ type Keeper struct {
 
 	Schema collections.Schema
 	Params collections.Item[types.Params]
-    
-	Port   collections.Item[string]
 
-	ibcKeeperFn func() *ibckeeper.Keeper 
-	
-    bankKeeper types.BankKeeper
-    stakingKeeper types.StakingKeeper
+	Port collections.Item[string]
+
+	ibcKeeperFn func() *ibckeeper.Keeper
+
+	bankKeeper         types.BankKeeper
+	stakingKeeper      types.StakingKeeper
+	distributionKeeper types.DistributionKeeper
 }
 
 func NewKeeper(
@@ -37,9 +38,9 @@ func NewKeeper(
 	addressCodec address.Codec,
 	authority []byte,
 	ibcKeeperFn func() *ibckeeper.Keeper,
-    
-    bankKeeper types.BankKeeper,
-    stakingKeeper types.StakingKeeper,
+	bankKeeper types.BankKeeper,
+	stakingKeeper types.StakingKeeper,
+	distributionKeeper types.DistributionKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -48,16 +49,16 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
-		storeService: storeService,
-		cdc:          cdc,
-		addressCodec: addressCodec,
-		authority:    authority,
-		
-		bankKeeper: bankKeeper,
-		stakingKeeper: stakingKeeper,
-		ibcKeeperFn:  ibcKeeperFn,
-		Port:         collections.NewItem(sb, types.PortKey, "port", collections.StringValue),
-		Params:       collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		storeService:       storeService,
+		cdc:                cdc,
+		addressCodec:       addressCodec,
+		authority:          authority,
+		bankKeeper:         bankKeeper,
+		stakingKeeper:      stakingKeeper,
+		distributionKeeper: distributionKeeper,
+		ibcKeeperFn:        ibcKeeperFn,
+		Port:               collections.NewItem(sb, types.PortKey, "port", collections.StringValue),
+		Params:             collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 	}
 
 	schema, err := sb.Build()

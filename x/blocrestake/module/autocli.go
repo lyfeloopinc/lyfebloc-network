@@ -21,20 +21,43 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			},
 		},
 		Tx: &autocliv1.ServiceCommandDescriptor{
-			Service: types.Msg_serviceDesc.ServiceName,
+			Service:              types.Msg_serviceDesc.ServiceName,
 			EnhanceCustomCommand: true, // only required if you want to use the custom command
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "UpdateParams",
-					Skip:       true, // skipped because authority gated
+					Skip:      true, // skipped because authority gated
 				},
 				{
-			RpcMethod: "Delegate",
-			Use: "delegate [delegator] [validator] [amount]",
-			Short: "Send a Delegate tx",
-			PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "delegator"}, {ProtoField: "validator"}, {ProtoField: "amount"}},
-		},
-		// this line is used by ignite scaffolding # autocli/tx
+					RpcMethod: "Delegate",
+					Use:       "delegate [delegator] [validator] [amount]",
+					Short:     "Send a Delegate tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "delegator"},
+						{ProtoField: "validator"},
+						{ProtoField: "amount"},
+					},
+				},
+				{
+					RpcMethod: "Undelegate",
+					Use:       "undelegate [delegator] [validator] [amount]",
+					Short:     "Send an Undelegate tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "delegator"},
+						{ProtoField: "validator"},
+						{ProtoField: "amount"},
+					},
+				},
+				{
+					RpcMethod: "ClaimAndRestake",
+					Use:       "claim-and-restake [delegator] [validator]",
+					Short:     "Send a ClaimAndRestake tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "delegator"},
+						{ProtoField: "validator"},
+					},
+				},
+				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},
 	}

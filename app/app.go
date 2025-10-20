@@ -1,6 +1,8 @@
 package app
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 
 	clienthelpers "cosmossdk.io/client/v2/helpers"
@@ -13,18 +15,18 @@ import (
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 
 	abci "github.com/cometbft/cometbft/abci/types"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
-	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/server/api"
-	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	// modules
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
@@ -40,7 +42,12 @@ import (
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
+	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
+	staking "github.com/cosmos/cosmos-sdk/x/staking"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	// EVM
 	evmante "github.com/cosmos/evm/ante"
 	evmmempool "github.com/cosmos/evm/mempool"
 	evmsrvflags "github.com/cosmos/evm/server/flags"
@@ -48,29 +55,32 @@ import (
 	feemarketkeeper "github.com/cosmos/evm/x/feemarket/keeper"
 	ibctransferkeeper "github.com/cosmos/evm/x/ibc/transfer/keeper"
 	evmkeeper "github.com/cosmos/evm/x/vm/keeper"
+
+	// IBC
 	icacontrollerkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/controller/keeper"
 	icahostkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/host/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
+
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
+
 	"github.com/spf13/cast"
 
-	"github.com/lyfeloopinc/lyfebloc-network/docs"
+	// custom modules
 	blocrestakemodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/keeper"
 	lyfeblocnetworkmodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/keeper"
-	restakemodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/restake/keeper"
 )
+
+// --------------------------
+// Core Constants
+// --------------------------
 
 const (
-	// Name is the name of the application.
-	Name = "lyfebloc-network"
-	// AccountAddressPrefix is the prefix for accounts addresses.
+	Name                 = "lyfebloc-network"
 	AccountAddressPrefix = "lyfebloc"
-	// ChainCoinType is the coin type of the chain.
-	ChainCoinType = 118
+	ChainCoinType        = 118
 )
 
-// DefaultNodeHome default home directories for the application daemon
 var DefaultNodeHome string
 
 var (
@@ -78,9 +88,10 @@ var (
 	_ servertypes.Application = (*App)(nil)
 )
 
-// App extends an ABCI application, but with most of its parameters exported.
-// They are exported for convenience in creating helper functions, as object
-// capabilities aren't needed for testing.
+// --------------------------
+// Application Definition
+// --------------------------
+
 type App struct {
 	*runtime.App
 	legacyAmino       *codec.LegacyAmino
@@ -88,9 +99,7 @@ type App struct {
 	txConfig          client.TxConfig
 	interfaceRegistry codectypes.InterfaceRegistry
 
-	// keepers
-	// only keepers required by the app are exposed
-	// the list of all modules is available in the app_config
+	// Base keepers
 	AuthKeeper            authkeeper.AccountKeeper
 	BankKeeper            bankkeeper.Keeper
 	StakingKeeper         *stakingkeeper.Keeper
@@ -104,27 +113,32 @@ type App struct {
 	CircuitBreakerKeeper  circuitkeeper.Keeper
 	ParamsKeeper          paramskeeper.Keeper
 
-	// ibc keepers
+	// IBC
 	IBCKeeper           *ibckeeper.Keeper
 	ICAControllerKeeper icacontrollerkeeper.Keeper
 	ICAHostKeeper       icahostkeeper.Keeper
 	TransferKeeper      ibctransferkeeper.Keeper
 
-	// simulation manager
-	sm                    *module.SimulationManager
-	LyfeblocnetworkKeeper lyfeblocnetworkmodulekeeper.Keeper
-	clientCtx             client.Context
-	pendingTxListeners    []evmante.PendingTxListener
-	FeeGrantKeeper        feegrantkeeper.Keeper
-	FeeMarketKeeper       feemarketkeeper.Keeper
-	EVMKeeper             *evmkeeper.Keeper
-	Erc20Keeper           erc20keeper.Keeper
+	// EVM
+	FeeGrantKeeper  feegrantkeeper.Keeper
+	FeeMarketKeeper feemarketkeeper.Keeper
+	EVMKeeper       *evmkeeper.Keeper
+	Erc20Keeper     erc20keeper.Keeper
+	EVMMempool      *evmmempool.ExperimentalEVMMempool
 
-	// AppConfig returns the default app config.
-	EVMMempool        *evmmempool.ExperimentalEVMMempool
-	RestakeKeeper     restakemodulekeeper.Keeper
-	BlocrestakeKeeper blocrestakemodulekeeper.Keeper
+	// Custom modules
+	LyfeblocnetworkKeeper lyfeblocnetworkmodulekeeper.Keeper
+	BlocrestakeKeeper     blocrestakemodulekeeper.Keeper
+
+	// Simulation
+	sm                 *module.SimulationManager
+	clientCtx          client.Context
+	pendingTxListeners []evmante.PendingTxListener
 }
+
+// --------------------------
+// Initialization
+// --------------------------
 
 func init() {
 	var err error
@@ -138,16 +152,16 @@ func init() {
 func AppConfig() depinject.Config {
 	return depinject.Configs(
 		appConfig,
-		depinject.Supply(
-			// supply custom module basics
-			map[string]module.AppModuleBasic{
-				genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
-			},
-		),
+		depinject.Supply(map[string]module.AppModuleBasic{
+			genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+		}),
 	)
 }
 
-// New returns a reference to an initialized App.
+// --------------------------
+// Constructor
+// --------------------------
+
 func New(
 	logger log.Logger,
 	db dbm.DB,
@@ -156,27 +170,22 @@ func New(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
+	sdk.DefaultBondDenom = "ulbt"
+
 	var (
 		app        = &App{}
 		appBuilder *runtime.AppBuilder
 
-		// merge the AppConfig and other configuration in one config
 		appConfig = depinject.Configs(
 			AppConfig(),
-			depinject.Supply(
-				appOpts, // supply app options
-				logger,  // supply logger
-				// here alternative options can be supplied to the DI container.
-				// those options can be used f.e to override the default behavior of some modules.
-				// for instance supplying a custom address codec for not using bech32 addresses.
-				// read the depinject documentation and depinject module wiring for more information
-				// on available options and how to use them.
-			), depinject.Provide(ProvideMsgEthereumTxCustomGetSigner),
+			depinject.Supply(appOpts, logger),
+			depinject.Provide(ProvideMsgEthereumTxCustomGetSigner),
 		)
 	)
 
 	var appModules map[string]appmodule.AppModule
-	if err := depinject.Inject(appConfig,
+	if err := depinject.Inject(
+		appConfig,
 		&appBuilder,
 		&appModules,
 		&app.appCodec,
@@ -195,24 +204,21 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
-		&app.LyfeblocnetworkKeeper, &app.FeeGrantKeeper,
-		&app.RestakeKeeper,
+		&app.LyfeblocnetworkKeeper,
+		&app.FeeGrantKeeper,
 		&app.BlocrestakeKeeper,
 	); err != nil {
 		panic(err)
 	}
 
-	// add to default baseapp options
-	// enable optimistic execution
 	baseAppOptions = append(baseAppOptions, baseapp.SetOptimisticExecution())
 
-	// build app
 	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
+
+	// EVM / IBC registration
 	if err := app.registerEVMModules(appOpts); err != nil {
 		panic(err)
 	}
-
-	// register legacy modules
 	if err := app.registerIBCModules(appOpts); err != nil {
 		panic(err)
 	}
@@ -220,29 +226,21 @@ func New(
 		panic(err)
 	}
 
-	/****  Module Options ****/
-
-	// create the simulation manager and define the order of the modules for deterministic simulations
 	overrideModules := map[string]module.AppModuleSimulation{
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AuthKeeper, authsims.RandomGenesisAccounts, nil),
 	}
 	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, overrideModules)
-
 	app.sm.RegisterStoreDecoders()
 
-	// A custom InitChainer sets if extra pre-init-genesis logic is required.
-	// This is necessary for manually registered modules that do not support app wiring.
-	// Manually set the module version map as shown below.
-	// The upgrade module will automatically handle de-duplication of the module version map.
 	app.SetInitChainer(func(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
 		if err := app.UpgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap()); err != nil {
 			return nil, err
 		}
 		return app.App.InitChainer(ctx, req)
 	})
+
 	maxGasWanted := cast.ToUint64(appOpts.Get(evmsrvflags.EVMMaxTxGasWanted))
 	app.setAnteHandler(app.txConfig, maxGasWanted)
-
 	app.setEVMMempool()
 
 	if err := app.Load(loadLatest); err != nil {
@@ -252,33 +250,29 @@ func New(
 	return app
 }
 
+// --------------------------
+// Runtime Helper Methods
+// --------------------------
+
+// LegacyAmino returns the App's amino codec.
+func (app *App) LegacyAmino() *codec.LegacyAmino { return app.legacyAmino }
+
+// AppCodec returns the App's codec.
+func (app *App) AppCodec() codec.Codec { return app.appCodec }
+
+// InterfaceRegistry returns the App's InterfaceRegistry.
+func (app *App) InterfaceRegistry() codectypes.InterfaceRegistry { return app.interfaceRegistry }
+
+// TxConfig returns the App's TxConfig.
+func (app *App) TxConfig() client.TxConfig { return app.txConfig }
+
 // GetSubspace returns a param subspace for a given module name.
 func (app *App) GetSubspace(moduleName string) paramstypes.Subspace {
 	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
 	return subspace
 }
 
-// LegacyAmino returns App's amino codec.
-func (app *App) LegacyAmino() *codec.LegacyAmino {
-	return app.legacyAmino
-}
-
-// AppCodec returns App's app codec.
-func (app *App) AppCodec() codec.Codec {
-	return app.appCodec
-}
-
-// InterfaceRegistry returns App's InterfaceRegistry.
-func (app *App) InterfaceRegistry() codectypes.InterfaceRegistry {
-	return app.interfaceRegistry
-}
-
-// TxConfig returns App's TxConfig
-func (app *App) TxConfig() client.TxConfig {
-	return app.txConfig
-}
-
-// GetKey returns the KVStoreKey for the provided store key.
+// GetKey returns the KVStoreKey for a given name.
 func (app *App) GetKey(storeKey string) *storetypes.KVStoreKey {
 	kvStoreKey, ok := app.UnsafeFindStoreKey(storeKey).(*storetypes.KVStoreKey)
 	if !ok {
@@ -287,60 +281,217 @@ func (app *App) GetKey(storeKey string) *storetypes.KVStoreKey {
 	return kvStoreKey
 }
 
-// SimulationManager implements the SimulationApp interface
-func (app *App) SimulationManager() *module.SimulationManager {
-	return app.sm
+// GetStoreKeysMap returns all store keys as a map.
+func (app *App) GetStoreKeysMap() map[string]*storetypes.KVStoreKey {
+	keys := make(map[string]*storetypes.KVStoreKey)
+	for _, storeKey := range app.GetStoreKeys() {
+		if kv, ok := app.UnsafeFindStoreKey(storeKey.Name()).(*storetypes.KVStoreKey); ok {
+			keys[storeKey.Name()] = kv
+		}
+	}
+	return keys
 }
 
-// RegisterAPIRoutes registers all application module routes with the provided
-// API server.
-func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
-	app.App.RegisterAPIRoutes(apiSvr, apiConfig)
-	// register swagger API in app.go so that other applications can override easily
-	if err := server.RegisterSwaggerAPI(apiSvr.ClientCtx, apiSvr.Router, apiConfig.Swagger); err != nil {
+// SimulationManager implements the SimulationApp interface.
+func (app *App) SimulationManager() *module.SimulationManager { return app.sm }
+
+// ExportAppStateAndValidators satisfies runtime.AppI for SDK v0.53+.
+func (app *App) ExportAppStateAndValidators(
+	forZeroHeight bool,
+	jailAllowedAddrs []string,
+	modulesToExport []string,
+) (servertypes.ExportedApp, error) {
+	ctx := app.NewContextLegacy(true, cmtproto.Header{Height: app.LastBlockHeight()})
+
+	height := app.LastBlockHeight() + 1
+	if forZeroHeight {
+		height = 0
+		app.prepForZeroHeightGenesis(ctx, jailAllowedAddrs)
+	}
+
+	genState, err := app.ModuleManager.ExportGenesisForModules(ctx, app.appCodec, modulesToExport)
+	if err != nil {
+		return servertypes.ExportedApp{}, err
+	}
+
+	appState, err := json.MarshalIndent(genState, "", "  ")
+	if err != nil {
+		return servertypes.ExportedApp{}, err
+	}
+
+	validators, err := staking.WriteValidators(ctx, app.StakingKeeper)
+
+	return servertypes.ExportedApp{
+		AppState:        appState,
+		Validators:      validators,
+		Height:          height,
+		ConsensusParams: app.BaseApp.GetConsensusParams(ctx),
+	}, err
+}
+
+func (app *App) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []string) {
+	applyAllowedAddrs := len(jailAllowedAddrs) > 0
+
+	allowedAddrsMap := make(map[string]bool)
+	for _, addr := range jailAllowedAddrs {
+		_, err := app.InterfaceRegistry().SigningContext().ValidatorAddressCodec().StringToBytes(addr)
+		if err != nil {
+			panic(err)
+		}
+		allowedAddrsMap[addr] = true
+	}
+
+	if err := app.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
+		valBz, err := app.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
+		if err != nil {
+			panic(err)
+		}
+		_, _ = app.DistrKeeper.WithdrawValidatorCommission(ctx, valBz)
+		return false
+	}); err != nil {
 		panic(err)
 	}
 
-	// register app's OpenAPI routes.
-	docs.RegisterOpenAPIService(Name, apiSvr.Router)
-}
-
-// GetMaccPerms returns a copy of the module account permissions
-//
-// NOTE: This is solely to be used for testing purposes.
-func GetMaccPerms() map[string][]string {
-	dup := make(map[string][]string)
-	for _, perms := range moduleAccPerms {
-		dup[perms.GetAccount()] = perms.GetPermissions()
+	dels, err := app.StakingKeeper.GetAllDelegations(ctx)
+	if err != nil {
+		panic(err)
 	}
 
-	return dup
-}
-
-// BlockedAddresses returns all the app's blocked account addresses.
-func BlockedAddresses() map[string]bool {
-	result := make(map[string]bool)
-
-	if len(blockAccAddrs) > 0 {
-		for _, addr := range blockAccAddrs {
-			result[addr] = true
+	for _, delegation := range dels {
+		valAddr, err := app.InterfaceRegistry().SigningContext().ValidatorAddressCodec().StringToBytes(delegation.ValidatorAddress)
+		if err != nil {
+			panic(err)
 		}
-	} else {
-		for addr := range GetMaccPerms() {
-			result[addr] = true
+
+		delAddr, err := app.InterfaceRegistry().SigningContext().AddressCodec().StringToBytes(delegation.DelegatorAddress)
+		if err != nil {
+			panic(err)
+		}
+
+		_, _ = app.DistrKeeper.WithdrawDelegationRewards(ctx, delAddr, valAddr)
+	}
+
+	app.DistrKeeper.DeleteAllValidatorSlashEvents(ctx)
+	app.DistrKeeper.DeleteAllValidatorHistoricalRewards(ctx)
+
+	height := ctx.BlockHeight()
+	ctx = ctx.WithBlockHeight(0)
+
+	if err := app.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
+		valBz, err := app.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
+		if err != nil {
+			panic(err)
+		}
+
+		rewards, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valBz)
+		if err != nil {
+			panic(err)
+		}
+		feePool, err := app.DistrKeeper.FeePool.Get(ctx)
+		if err != nil {
+			panic(err)
+		}
+		feePool.CommunityPool = feePool.CommunityPool.Add(rewards...)
+		if err := app.DistrKeeper.FeePool.Set(ctx, feePool); err != nil {
+			panic(err)
+		}
+
+		if err := app.DistrKeeper.Hooks().AfterValidatorCreated(ctx, valBz); err != nil {
+			panic(err)
+		}
+		return false
+	}); err != nil {
+		panic(err)
+	}
+
+	for _, del := range dels {
+		valAddr, err := app.InterfaceRegistry().SigningContext().ValidatorAddressCodec().StringToBytes(del.ValidatorAddress)
+		if err != nil {
+			panic(err)
+		}
+		delAddr, err := app.InterfaceRegistry().SigningContext().AddressCodec().StringToBytes(del.DelegatorAddress)
+		if err != nil {
+			panic(err)
+		}
+
+		if err := app.DistrKeeper.Hooks().BeforeDelegationCreated(ctx, delAddr, valAddr); err != nil {
+			panic(fmt.Errorf("error while incrementing period: %w", err))
+		}
+		if err := app.DistrKeeper.Hooks().AfterDelegationModified(ctx, delAddr, valAddr); err != nil {
+			panic(fmt.Errorf("error while creating a new delegation period record: %w", err))
 		}
 	}
 
-	return result
-}
-func (app *App) GetStoreKeysMap() map[string]*storetypes.KVStoreKey {
-	storeKeysMap := make(map[string]*storetypes.KVStoreKey)
-	for _, storeKey := range app.GetStoreKeys() {
-		kvStoreKey, ok := app.UnsafeFindStoreKey(storeKey.Name()).(*storetypes.KVStoreKey)
-		if ok {
-			storeKeysMap[storeKey.Name()] = kvStoreKey
+	ctx = ctx.WithBlockHeight(height)
+
+	if err := app.StakingKeeper.IterateRedelegations(ctx, func(_ int64, red stakingtypes.Redelegation) (stop bool) {
+		for i := range red.Entries {
+			red.Entries[i].CreationHeight = 0
+		}
+		if err := app.StakingKeeper.SetRedelegation(ctx, red); err != nil {
+			panic(err)
+		}
+		return false
+	}); err != nil {
+		panic(err)
+	}
+
+	if err := app.StakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd stakingtypes.UnbondingDelegation) (stop bool) {
+		for i := range ubd.Entries {
+			ubd.Entries[i].CreationHeight = 0
+		}
+		if err := app.StakingKeeper.SetUnbondingDelegation(ctx, ubd); err != nil {
+			panic(err)
+		}
+		return false
+	}); err != nil {
+		panic(err)
+	}
+
+	store := ctx.KVStore(app.GetKey(stakingtypes.StoreKey))
+	iter := storetypes.KVStoreReversePrefixIterator(store, stakingtypes.ValidatorsKey)
+
+	for ; iter.Valid(); iter.Next() {
+		addr := sdk.ValAddress(stakingtypes.AddressFromValidatorsKey(iter.Key()))
+		validator, err := app.StakingKeeper.GetValidator(ctx, addr)
+		if err != nil {
+			panic("expected validator, not found")
+		}
+
+		valAddr, err := app.StakingKeeper.ValidatorAddressCodec().BytesToString(addr)
+		if err != nil {
+			panic(err)
+		}
+
+		validator.UnbondingHeight = 0
+		if applyAllowedAddrs && !allowedAddrsMap[valAddr] {
+			validator.Jailed = true
+		}
+
+		if err = app.StakingKeeper.SetValidator(ctx, validator); err != nil {
+			panic(err)
 		}
 	}
 
-	return storeKeysMap
+	if err := iter.Close(); err != nil {
+		app.Logger().Error("error while closing the key-value store reverse prefix iterator: ", err)
+		return
+	}
+
+	if _, err := app.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx); err != nil {
+		panic(err)
+	}
+
+	if err := app.SlashingKeeper.IterateValidatorSigningInfos(
+		ctx,
+		func(addr sdk.ConsAddress, info slashingtypes.ValidatorSigningInfo) (stop bool) {
+			info.StartHeight = 0
+			if err := app.SlashingKeeper.SetValidatorSigningInfo(ctx, addr, info); err != nil {
+				panic(err)
+			}
+			return false
+		},
+	); err != nil {
+		panic(err)
+	}
 }

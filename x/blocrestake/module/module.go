@@ -11,46 +11,40 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"google.golang.org/grpc"
 	porttypes "github.com/cosmos/ibc-go/v10/modules/core/05-port/types"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 
+	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/client/cli"
 	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/keeper"
 	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
-	"github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/client/cli"
 )
 
 var (
 	_ module.AppModuleBasic = (*AppModule)(nil)
 	_ module.AppModule      = (*AppModule)(nil)
-	_ module.HasGenesis	  = (*AppModule)(nil)
+	_ module.HasGenesis     = (*AppModule)(nil)
 
 	_ appmodule.AppModule       = (*AppModule)(nil)
 	_ appmodule.HasBeginBlocker = (*AppModule)(nil)
 	_ appmodule.HasEndBlocker   = (*AppModule)(nil)
-	_ porttypes.IBCModule   = (*IBCModule)(nil)
+	_ porttypes.IBCModule       = (*IBCModule)(nil)
 )
 
 // AppModule implements the AppModule interface that defines the inter-dependent methods that modules need to implement
 type AppModule struct {
-	cdc           codec.Codec
-	keeper        keeper.Keeper
-	authKeeper    types.AuthKeeper
-	bankKeeper    types.BankKeeper
+	cdc    codec.Codec
+	keeper keeper.Keeper
 }
 
 func NewAppModule(
 	cdc codec.Codec,
 	keeper keeper.Keeper,
-	authKeeper types.AuthKeeper,
-	bankKeeper types.BankKeeper,
 ) AppModule {
 	return AppModule{
-		cdc:           cdc,
-		keeper:        keeper,
-		authKeeper:    authKeeper,
-		bankKeeper:    bankKeeper,
+		cdc:    cdc,
+		keeper: keeper,
 	}
 }
 
@@ -67,9 +61,7 @@ func (AppModule) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module.
 func (AppModule) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	if err := types.RegisterQueryHandlerClient(clientCtx.CmdContext, mux, types.NewQueryClient(clientCtx)); err != nil {
-		panic(err)
-	}
+	// TODO: add gRPC-Gateway handlers once HTTP bindings are generated for blocrestake queries.
 }
 
 // RegisterInterfaces registers a module's interface types and their concrete implementations as proto.Message.
@@ -79,8 +71,8 @@ func (AppModule) RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 
 // RegisterServices registers a gRPC query service to respond to the module-specific gRPC queries
 func (am AppModule) RegisterServices(registrar grpc.ServiceRegistrar) error {
-    types.RegisterMsgServer(registrar, keeper.NewMsgServerImpl(am.keeper))
-    types.RegisterQueryServer(registrar, keeper.NewQueryServerImpl(am.keeper))
+	types.RegisterMsgServer(registrar, keeper.NewMsgServerImpl(am.keeper))
+	types.RegisterQueryServer(registrar, keeper.NewQueryServerImpl(am.keeper))
 
 	return nil
 }
@@ -146,9 +138,8 @@ func (am AppModule) EndBlock(_ context.Context) error {
 	return nil
 }
 
-
 // GetTxCmd returns the root Tx command for the module.
 // These commands enrich the AutoCLI tx commands.
 func (AppModule) GetTxCmd() *cobra.Command {
-    return cli.GetTxCmd()
+	return cli.GetTxCmd()
 }

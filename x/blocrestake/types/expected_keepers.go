@@ -2,43 +2,27 @@ package types
 
 import (
 	"context"
+	"time"
 
-	"cosmossdk.io/core/address"
-    stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	
-    sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-
-    
-    
-
-    
-        // StakingKeeper defines the expected interface for the Staking module.
-        type StakingKeeper interface {
-        	ConsensusAddressCodec() address.Codec
-        	ValidatorByConsAddr(context.Context, sdk.ConsAddress) (stakingtypes.ValidatorI, error)
-        	// Methods imported from account should be defined here
-        }
-
-    
-
-
-// AuthKeeper defines the expected interface for the Auth module.
-type AuthKeeper interface {
-    AddressCodec() address.Codec
-    GetAccount(context.Context, sdk.AccAddress) sdk.AccountI // only used for simulation
-    // Methods imported from account should be defined here
-}
-
-// BankKeeper defines the expected interface for the Bank module.
 type BankKeeper interface {
-    SpendableCoins(context.Context, sdk.AccAddress) sdk.Coins
-    // Methods imported from bank should be defined here
+	SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
+	MintCoins(ctx context.Context, moduleName string, amt sdk.Coins) error
+	GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
 }
 
-// ParamSubspace defines the expected Subspace interface for parameters.
-type ParamSubspace interface {
-	Get(context.Context, []byte, interface{})
-	Set(context.Context, []byte, interface{})
+type StakingKeeper interface {
+	GetValidator(ctx context.Context, addr sdk.ValAddress) (stakingtypes.Validator, error)
+	Delegate(ctx context.Context, delAddr sdk.AccAddress, amt math.Int, status stakingtypes.BondStatus, validator stakingtypes.Validator, subtractAccount bool) (math.LegacyDec, error)
+	Undelegate(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress, shares math.LegacyDec) (time.Time, math.Int, error)
+	BondDenom(ctx context.Context) (string, error)
+}
+
+type DistributionKeeper interface {
+	WithdrawDelegationRewards(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) (sdk.Coins, error)
 }

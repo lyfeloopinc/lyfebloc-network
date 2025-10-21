@@ -1,0 +1,445 @@
+version: "3.9"
+
+x-validator-common: &validator-common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile.node
+  image: lyfebloc/node:local
+  restart: unless-stopped
+  networks:
+    - lyfeblocnet
+
+x-validator-env: &validator-env
+  NETWORK: ${NETWORK:-devnet}
+
+services:
+  validator1:
+    <<: *validator-common
+    container_name: lyfebloc-validator1
+    profiles: ["devnet", "testnet", "mainnet"]
+    environment:
+      <<: *validator-env
+      MONIKER: validator1
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator1:/home/lyfebloc/.lyfebloc-network
+    ports:
+      - "26656:26656"
+      - "26657:26657"
+      - "1317:1317"
+      - "9090:9090"
+      - "9091:9091"
+  validator2:
+    <<: *validator-common
+    container_name: lyfebloc-validator2
+    profiles: ["devnet", "testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator2
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator2:/home/lyfebloc/.lyfebloc-network
+  validator3:
+    <<: *validator-common
+    container_name: lyfebloc-validator3
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator3
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator3:/home/lyfebloc/.lyfebloc-network
+  validator4:
+    <<: *validator-common
+    container_name: lyfebloc-validator4
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator4
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator4:/home/lyfebloc/.lyfebloc-network
+  validator5:
+    <<: *validator-common
+    container_name: lyfebloc-validator5
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator5
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator5:/home/lyfebloc/.lyfebloc-network
+  validator6:
+    <<: *validator-common
+    container_name: lyfebloc-validator6
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator6
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator6:/home/lyfebloc/.lyfebloc-network
+  validator7:
+    <<: *validator-common
+    container_name: lyfebloc-validator7
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator7
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator7:/home/lyfebloc/.lyfebloc-network
+  validator8:
+    <<: *validator-common
+    container_name: lyfebloc-validator8
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator8
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator8:/home/lyfebloc/.lyfebloc-network
+  validator9:
+    <<: *validator-common
+    container_name: lyfebloc-validator9
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator9
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator9:/home/lyfebloc/.lyfebloc-network
+  validator10:
+    <<: *validator-common
+    container_name: lyfebloc-validator10
+    profiles: ["testnet", "mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator10
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator10:/home/lyfebloc/.lyfebloc-network
+  validator11:
+    <<: *validator-common
+    container_name: lyfebloc-validator11
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator11
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator11:/home/lyfebloc/.lyfebloc-network
+  validator12:
+    <<: *validator-common
+    container_name: lyfebloc-validator12
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator12
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator12:/home/lyfebloc/.lyfebloc-network
+  validator13:
+    <<: *validator-common
+    container_name: lyfebloc-validator13
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator13
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator13:/home/lyfebloc/.lyfebloc-network
+  validator14:
+    <<: *validator-common
+    container_name: lyfebloc-validator14
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator14
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator14:/home/lyfebloc/.lyfebloc-network
+  validator15:
+    <<: *validator-common
+    container_name: lyfebloc-validator15
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator15
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator15:/home/lyfebloc/.lyfebloc-network
+  validator16:
+    <<: *validator-common
+    container_name: lyfebloc-validator16
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator16
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator16:/home/lyfebloc/.lyfebloc-network
+  validator17:
+    <<: *validator-common
+    container_name: lyfebloc-validator17
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator17
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator17:/home/lyfebloc/.lyfebloc-network
+  validator18:
+    <<: *validator-common
+    container_name: lyfebloc-validator18
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator18
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator18:/home/lyfebloc/.lyfebloc-network
+  validator19:
+    <<: *validator-common
+    container_name: lyfebloc-validator19
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator19
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator19:/home/lyfebloc/.lyfebloc-network
+  validator20:
+    <<: *validator-common
+    container_name: lyfebloc-validator20
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator20
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator20:/home/lyfebloc/.lyfebloc-network
+  validator21:
+    <<: *validator-common
+    container_name: lyfebloc-validator21
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator21
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator21:/home/lyfebloc/.lyfebloc-network
+  validator22:
+    <<: *validator-common
+    container_name: lyfebloc-validator22
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator22
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator22:/home/lyfebloc/.lyfebloc-network
+  validator23:
+    <<: *validator-common
+    container_name: lyfebloc-validator23
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator23
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator23:/home/lyfebloc/.lyfebloc-network
+  validator24:
+    <<: *validator-common
+    container_name: lyfebloc-validator24
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator24
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator24:/home/lyfebloc/.lyfebloc-network
+  validator25:
+    <<: *validator-common
+    container_name: lyfebloc-validator25
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator25
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator25:/home/lyfebloc/.lyfebloc-network
+  validator26:
+    <<: *validator-common
+    container_name: lyfebloc-validator26
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator26
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator26:/home/lyfebloc/.lyfebloc-network
+  validator27:
+    <<: *validator-common
+    container_name: lyfebloc-validator27
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator27
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator27:/home/lyfebloc/.lyfebloc-network
+  validator28:
+    <<: *validator-common
+    container_name: lyfebloc-validator28
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator28
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator28:/home/lyfebloc/.lyfebloc-network
+  validator29:
+    <<: *validator-common
+    container_name: lyfebloc-validator29
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator29
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator29:/home/lyfebloc/.lyfebloc-network
+  validator30:
+    <<: *validator-common
+    container_name: lyfebloc-validator30
+    profiles: ["mainnet"]
+    depends_on:
+      - validator1
+    environment:
+      <<: *validator-env
+      MONIKER: validator30
+      PERSISTENT_PEERS: lyfebloc-validator1:26656
+    volumes:
+      - ../data/${NETWORK:-devnet}:/seed:ro
+      - ../data/validators/${NETWORK:-devnet}/validator30:/home/lyfebloc/.lyfebloc-network
+
+  prometheus:
+    build:
+      context: .
+      dockerfile: Dockerfile.metrics
+    container_name: lyfebloc-prometheus
+    profiles: ["devnet", "testnet", "mainnet"]
+    ports:
+      - "9100:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - lyfeblocnet
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: lyfebloc-grafana
+    profiles: ["devnet", "testnet", "mainnet"]
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_DEFAULT_THEME=dark
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+    volumes:
+      - ./grafana-provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - lyfeblocnet
+
+
+networks:
+  lyfeblocnet:
+    driver: bridge

@@ -1,0 +1,4 @@
+# Dockerfile.metrics - packages Prometheus with project-specific configuration
+FROM prom/prometheus:v2.52.0
+
+COPY prometheus.yml /etc/prometheus/prometheus.yml

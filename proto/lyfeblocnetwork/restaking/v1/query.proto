@@ -1,0 +1,18 @@
+syntax = "proto3";
+package lyfeblocnetwork.restaking.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/lyfeloopinc/lyfebloc-network/lyfeblocnetwork/restaking/v1";
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  string auto_restake_ratio = 1;
+}
+
+service Query {
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/lyfeblocnetwork/restaking/v1/params";
+  }
+}

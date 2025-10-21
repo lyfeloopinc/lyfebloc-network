@@ -69,6 +69,7 @@ import (
 	// custom modules
 	blocrestakemodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/keeper"
 	lyfeblocnetworkmodulekeeper "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/keeper"
+	restakingkeeper "github.com/lyfeloopinc/lyfebloc-network/x/restaking/keeper"
 )
 
 // --------------------------
@@ -128,6 +129,7 @@ type App struct {
 
 	// Custom modules
 	LyfeblocnetworkKeeper lyfeblocnetworkmodulekeeper.Keeper
+	RestakingKeeper       restakingkeeper.Keeper
 	BlocrestakeKeeper     blocrestakemodulekeeper.Keeper
 
 	// Simulation
@@ -206,6 +208,7 @@ func New(
 		&app.ParamsKeeper,
 		&app.LyfeblocnetworkKeeper,
 		&app.FeeGrantKeeper,
+		&app.RestakingKeeper,
 		&app.BlocrestakeKeeper,
 	); err != nil {
 		panic(err)
@@ -214,7 +217,6 @@ func New(
 	baseAppOptions = append(baseAppOptions, baseapp.SetOptimisticExecution())
 
 	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
-
 	// EVM / IBC registration
 	if err := app.registerEVMModules(appOpts); err != nil {
 		panic(err)

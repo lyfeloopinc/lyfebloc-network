@@ -70,10 +70,13 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
 	ibcexported "github.com/cosmos/ibc-go/v10/modules/core/exported"
+	restakingmodulepb "github.com/lyfeloopinc/lyfebloc-network/lyfeblocnetwork/restaking/module/v1"
 	_ "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/module"
 	blocrestakemoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
 	_ "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/module"
 	lyfeblocnetworkmoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/types"
+	_ "github.com/lyfeloopinc/lyfebloc-network/x/restaking/module"
+	restakingtypes "github.com/lyfeloopinc/lyfebloc-network/x/restaking/types"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -137,6 +140,7 @@ var (
 						erc20types.ModuleName,
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
+						restakingtypes.ModuleName,
 						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
@@ -151,6 +155,7 @@ var (
 						erc20types.ModuleName,
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
+						restakingtypes.ModuleName,
 						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
@@ -195,6 +200,7 @@ var (
 						evmtypes.ModuleName,
 						// moved down because of evm modules
 						genutiltypes.ModuleName,
+						restakingtypes.ModuleName,
 						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
@@ -295,6 +301,10 @@ var (
 			{
 				Name:   lyfeblocnetworkmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&lyfeblocnetworkmoduletypes.Module{}),
+			},
+			{
+				Name:   restakingtypes.ModuleName,
+				Config: appconfig.WrapAny(&restakingmodulepb.Module{}),
 			},
 			{
 				Name:   blocrestakemoduletypes.ModuleName,

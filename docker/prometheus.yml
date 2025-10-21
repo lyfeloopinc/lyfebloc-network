@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "lyfebloc-validators"
+    static_configs:
+      - targets:
+          - validator1:26660
+          - validator2:26660
+          - validator3:26660
+          - validator4:26660
+          - validator5:26660
+          - validator6:26660
+          - validator7:26660
+          - validator8:26660
+          - validator9:26660
+          - validator10:26660
+          - validator11:26660
+          - validator12:26660
+          - validator13:26660
+          - validator14:26660
+          - validator15:26660
+          - validator16:26660
+          - validator17:26660
+          - validator18:26660
+          - validator19:26660
+          - validator20:26660
+          - validator21:26660
+          - validator22:26660
+          - validator23:26660
+          - validator24:26660
+          - validator25:26660
+          - validator26:26660
+          - validator27:26660
+          - validator28:26660
+          - validator29:26660
+          - validator30:26660
+

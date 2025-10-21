@@ -1,7 +1,7 @@
 version: 1
 validation: sovereign
 default_denom: ulbt
-accounts: 
+accounts:
 - name: alice
   coins:
   - 20000token
@@ -34,8 +34,9 @@ genesis:
         send_enabled: true
         receive_enabled: true
 
-# 🔧 Disable auto Swagger generation (fixes Ignite v0.53.x bug)
 build:
   proto:
     openapi: false
     swagger: false
+  app:
+    minimum_gas_prices: 0.025ulbt

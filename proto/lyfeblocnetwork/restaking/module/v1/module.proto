@@ -1,0 +1,15 @@
+syntax = "proto3";
+package lyfeblocnetwork.restaking.module.v1;
+
+import "cosmos/app/v1alpha1/module.proto";
+
+option go_package = "github.com/lyfeloopinc/lyfebloc-network/x/restaking/types";
+
+// Module defines the restaking module config.
+message Module {
+  option (cosmos.app.v1alpha1.module) = {
+    go_import: "github.com/lyfeloopinc/lyfebloc-network/x/restaking"
+  };
+
+  string authority = 1;
+}

@@ -1,0 +1,27 @@
+# Dockerfile.node - builds Lyfebloc network daemon and packages it into a slim runtime image
+FROM golang:1.24 AS build
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o /usr/local/bin/lyfebloc-networkd ./cmd/lyfebloc-networkd
+
+FROM debian:bookworm-slim
+
+RUN useradd --create-home --home-dir /home/lyfebloc lyfebloc \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl jq \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY docker/node-entrypoint.sh /usr/local/bin/node-entrypoint.sh
+COPY --from=build /usr/local/bin/lyfebloc-networkd /usr/bin/lyfebloc-networkd
+RUN chmod +x /usr/local/bin/node-entrypoint.sh
+
+USER lyfebloc
+WORKDIR /home/lyfebloc
+
+EXPOSE 26656 26657 9090 9091 1317
+
+ENTRYPOINT ["/usr/local/bin/node-entrypoint.sh"]
+CMD ["start", "--home", "/home/lyfebloc/.lyfebloc-network", "--minimum-gas-prices", "0.025ulbt"]

@@ -1,0 +1,15 @@
+syntax = "proto3";
+package lyfeblocnetwork.blocrestake.v1;
+
+option go_package = "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types";
+
+// BlocrestakePacketData defines the Blocrestake data packet.
+message BlocrestakePacketData {
+    oneof packet {
+        NoData noData = 1;
+    }
+}
+
+// NoData defines an empty data packet.
+message NoData {
+}

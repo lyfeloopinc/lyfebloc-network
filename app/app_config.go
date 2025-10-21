@@ -70,6 +70,8 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
 	ibcexported "github.com/cosmos/ibc-go/v10/modules/core/exported"
+	_ "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/module"
+	blocrestakemoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/blocrestake/types"
 	_ "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/module"
 	lyfeblocnetworkmoduletypes "github.com/lyfeloopinc/lyfebloc-network/x/lyfeblocnetwork/types"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -86,9 +88,10 @@ var (
 		{Account: nft.ModuleName},
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: icatypes.ModuleName},
-		{Account: evmtypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}, {Account: erc20types.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+		{Account: evmtypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+		{Account: erc20types.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: feemarkettypes.ModuleName},
-		// blocked account addresses
+		{Account: blocrestakemoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
 	}
 	blockAccAddrs = []string{
 		authtypes.FeeCollectorName,
@@ -134,6 +137,7 @@ var (
 						erc20types.ModuleName,
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
+						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -147,6 +151,7 @@ var (
 						erc20types.ModuleName,
 						feemarkettypes.ModuleName,
 						evmtypes.ModuleName,
+						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -190,6 +195,7 @@ var (
 						evmtypes.ModuleName,
 						// moved down because of evm modules
 						genutiltypes.ModuleName,
+						blocrestakemoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -289,6 +295,10 @@ var (
 			{
 				Name:   lyfeblocnetworkmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&lyfeblocnetworkmoduletypes.Module{}),
+			},
+			{
+				Name:   blocrestakemoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&blocrestakemoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

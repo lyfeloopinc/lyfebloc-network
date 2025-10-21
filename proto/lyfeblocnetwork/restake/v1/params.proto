@@ -1,0 +1,14 @@
+syntax = "proto3";
+package lyfeblocnetwork.restake.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/lyfeloopinc/lyfebloc-network/x/restake/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "lyfeblocnetwork/x/restake/Params";
+  option (gogoproto.equal) = true;
+  
+}

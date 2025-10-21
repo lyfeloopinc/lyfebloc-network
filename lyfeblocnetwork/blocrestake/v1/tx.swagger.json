@@ -1,0 +1,272 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "lyfeblocnetwork/blocrestake/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/lyfeblocnetwork.blocrestake.v1.Msg/ClaimAndRestake": {
+      "post": {
+        "summary": "ClaimAndRestake defines the ClaimAndRestake RPC.",
+        "operationId": "Msg_ClaimAndRestake",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgClaimAndRestakeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgClaimAndRestake defines the MsgClaimAndRestake message.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgClaimAndRestake"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/lyfeblocnetwork.blocrestake.v1.Msg/Delegate": {
+      "post": {
+        "summary": "Delegate defines the Delegate RPC.",
+        "operationId": "Msg_Delegate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgDelegateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgDelegate defines the MsgDelegate message.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgDelegate"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/lyfeblocnetwork.blocrestake.v1.Msg/Undelegate": {
+      "post": {
+        "summary": "Undelegate defines the Undelegate RPC.",
+        "operationId": "Msg_Undelegate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgUndelegateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUndelegate defines the MsgUndelegate message.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgUndelegate"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/lyfeblocnetwork.blocrestake.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgClaimAndRestake": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "delegator": {
+          "type": "string"
+        },
+        "validator": {
+          "type": "string"
+        }
+      },
+      "description": "MsgClaimAndRestake defines the MsgClaimAndRestake message."
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgClaimAndRestakeResponse": {
+      "type": "object",
+      "description": "MsgClaimAndRestakeResponse defines the MsgClaimAndRestakeResponse message."
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgDelegate": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "delegator": {
+          "type": "string"
+        },
+        "validator": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "MsgDelegate defines the MsgDelegate message."
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgDelegateResponse": {
+      "type": "object",
+      "description": "MsgDelegateResponse defines the MsgDelegateResponse message."
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgUndelegate": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "delegator": {
+          "type": "string"
+        },
+        "validator": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "MsgUndelegate defines the MsgUndelegate message."
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgUndelegateResponse": {
+      "type": "object",
+      "description": "MsgUndelegateResponse defines the MsgUndelegateResponse message."
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/lyfeblocnetwork.blocrestake.v1.Params",
+          "description": "NOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "lyfeblocnetwork.blocrestake.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "lyfeblocnetwork.blocrestake.v1.Params": {
+      "type": "object",
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}

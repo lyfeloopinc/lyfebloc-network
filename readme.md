@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="lb-net.png" alt="Lyfebloc Network Logo" width="220"/>
+  <img src="lb-net.png" alt="Lyfebloc Network Logo" width="300"/>
 </p>
 
 <h1 align="center" style="color:white;background-color:#0a0a0a;padding:16px;border-radius:8px;">
-  🌐 Lyfebloc Network — Powering Universal Restaking Across Chains
+  🌐 Powering Universal Restaking Across Chains
 </h1>
 
 <p align="center">
@@ -120,4 +120,4 @@ Built for validators, liquidity providers, and Web3 builders who believe in the 
 Apache 2.0 — © 2025 Lyfeloop Inc.
 All rights reserved.
 
-<p align="center"> <img src="lb-net.png" width="100" alt="Lyfebloc Logo"/><br/> <b>Lyfebloc Network — Powering Universal Restaking Across Chains</b> </p> `
+<p align="center"> <img src="lb-net.png" width="100" alt="Lyfebloc Logo"/><br/> <b>Powering Universal Restaking Across Chains</b> </p> `

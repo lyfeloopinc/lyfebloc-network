@@ -14,7 +14,7 @@
 
 ## 🪙 What Is Lyfebloc Network?
 
-**Lyfebloc Network (LBT)** is the world’s first **Universal Restaking Layer** built on the **Cosmos SDK + EVM** stack.  
+**Lyfebloc Network** is the world’s first **Universal Restaking Layer** built on the **Cosmos SDK + EVM** stack.  
 It unifies staking economics across chains through a **dual-module restaking engine** that enables validators, delegators, and liquidity providers to compound and restake yield automatically — across multiple Cosmos and EVM networks.
 
 > 💡 *“Restake once. Earn everywhere.”*

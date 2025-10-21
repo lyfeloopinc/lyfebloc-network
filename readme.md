@@ -107,8 +107,7 @@ Governance activation
 
 Bridge integrations (IBC & ERC-20)
 
-📢 Sign up for updates at https://lyfebloc.io
-Follow us on X: @LyfeblocNet
+
 
 🪶 Vision
 Lyfebloc is redefining the economics of validation.

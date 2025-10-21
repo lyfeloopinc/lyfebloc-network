@@ -119,4 +119,3 @@ Built for validators, liquidity providers, and Web3 builders who believe in the 
 Apache 2.0 — © 2025 Lyfeloop Inc.
 All rights reserved.
 
-<p align="center"> <img src="lb-net.png" width="100" alt="Lyfebloc Logo"/><br/> <b>Powering Universal Restaking Across Chains</b> </p> `
